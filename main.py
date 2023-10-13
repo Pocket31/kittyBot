@@ -62,6 +62,11 @@ email_highButton = InlineKeyboardButton(
     text='Почты HIGH репутация', callback_data='lol')
 builder.add(email_highButton)
 
+builder_1 = InlineKeyboardBuilder()
+trc_20_button = InlineKeyboardButton(
+    text='USDT TRC-20', callback_data='lol')
+builder_1.add(trc_20_button)
+
 
 @dp.message(F.text == 'Товары')
 async def category_items(message: types.Message):
@@ -76,6 +81,11 @@ async def category_items(message: types.Message):
 @dp.message(F.text == 'Поддержка')
 async def category_items(message: types.Message):
     await message.answer("Обращаться сюда: @ceftik")
+
+
+@dp.message(F.text == 'Баланс')
+async def balance(message: types.Message):
+    await message.answer("Выберите сеть в которой хотите пополнить баланс:", reply_markup=builder_1.as_markup())
 
 
 @dp.message(F.text == 'Кабинет')
