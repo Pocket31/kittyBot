@@ -13,15 +13,16 @@ SERVICE_ACCOUNT_FILE = 'C:/Users/cr796/OneDrive/Документы/kittyBot/shop
 credentials = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 service = build('drive', 'v3', credentials=credentials)
+# results = service.files().list().execute()
+# pp.pprint(results)
+results = service.files().list(q="mimeType='text/plain'").execute()
 
 
 def check_product():
-    results = service.files().list(q="mimeType='text/plain'").execute()
     return len(results['files'])
 
 
 def download_file():
-    results = service.files().list(q="mimeType='text/plain'").execute()
     file_id = results['files'][0]['id']
     request = service.files().get_media(fileId=file_id)
     filename = 'C:/Users/cr796/OneDrive/Документы/kittyBot/file.txt'
@@ -36,8 +37,8 @@ def download_file():
 
 
 def move_file():
-    file_id = '1SbZ5MPBmM5Q-UF_uUiiQnMldPaT6aGKz'
-    folder_id = 'NYfQzHrq_xecGEr2_4o9bXqeoKwFItrG'
+    file_id = results['files'][0]['id']
+    folder_id = '1NYfQzHrq_xecGEr2_4o9bXqeoKwFItrG'
 
     if not file_id or not folder_id:
         raise Exception(f'Did not find file specefied')
