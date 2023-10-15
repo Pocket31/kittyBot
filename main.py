@@ -5,6 +5,9 @@ from aiogram.filters import CommandStart
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from aiogram import F
 
+from walet.CreateWallet import create_wallet_usdt_trc_20
+from walet.Balance import check_balance_usdt_trc_20
+from googledrive.GD import check_product
 from TOKEN import TELEGRAM_TOKEN
 
 import sqlite3
@@ -14,6 +17,8 @@ bot = Bot(token=TELEGRAM_TOKEN)
 dp = Dispatcher()
 conn = sqlite3.connect('users.db')
 cursor = conn.cursor()
+
+user_id = None
 
 
 @dp.message(CommandStart())
@@ -25,16 +30,13 @@ async def send_welcome(message: types.Message):
     if user:
         pass
     else:
-        # Генерируем уникальный идентификатор для сессии
-        # session_id = str(uuid.uuid4())
-
         # Добавляем запись о пользователе в базу данных
         cursor.execute(
             f"INSERT INTO users (user_id, registered_date) VALUES ({user_id}, '{message.date}')")
         conn.commit()
 
     builder = ReplyKeyboardBuilder()
-    # builder.add(types.KeyboardButton(text="Товары"))
+
     builder.row(
         types.KeyboardButton(text="Товары"),
         types.KeyboardButton(text="Баланс"),
@@ -44,28 +46,29 @@ async def send_welcome(message: types.Message):
         types.KeyboardButton(text="Кабинет"),
         types.KeyboardButton(text="Поддержка"),
     )
-    # kb = [[
-    #     types.KeyboardButton(text="Кабинет"),
-    #     types.KeyboardButton(text="Поддержка"),
-    # ]]
-    # keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
 
     await message.answer("Добро пожаловать! \nЗдесь ты можешь приобрести почты HIGH репутации.", reply_markup=builder.as_markup(), resize_keyboard=True)
 
 
-# @dp.message(CommandStart())
-# async def process_help_command(message: types.Message):
-#     await message.reply("Напиши мне что-нибудь, и я отпрпавлю этот текст тебе в ответ!")
-
 builder = InlineKeyboardBuilder()
 email_highButton = InlineKeyboardButton(
-    text='Почты HIGH репутация', callback_data='lol')
+    text='Почты HIGH репутация', callback_data='email_high')
 builder.add(email_highButton)
 
-builder_1 = InlineKeyboardBuilder()
+builder_trc_20 = InlineKeyboardBuilder()
 trc_20_button = InlineKeyboardButton(
-    text='USDT TRC-20', callback_data='lol')
-builder_1.add(trc_20_button)
+    text='USDT TRC-20', callback_data='usdt_trc_20')
+builder_trc_20.add(trc_20_button)
+
+builder_check_balance = InlineKeyboardBuilder()
+check_balance_button = InlineKeyboardButton(
+    text='Обновить баланс', callback_data='usdt_trc_20')
+builder_check_balance.add(check_balance_button)
+
+builder_buy = InlineKeyboardBuilder()
+buy_button = InlineKeyboardButton(
+    text='Купить', callback_data='buy')
+builder_buy.add(buy_button)
 
 
 @dp.message(F.text == 'Товары')
@@ -85,7 +88,7 @@ async def category_items(message: types.Message):
 
 @dp.message(F.text == 'Баланс')
 async def balance(message: types.Message):
-    await message.answer("Выберите сеть в которой хотите пополнить баланс:", reply_markup=builder_1.as_markup())
+    await message.answer("Выберите сеть в которой хотите пополнить баланс:", reply_markup=builder_trc_20.as_markup())
 
 
 @dp.message(F.text == 'Кабинет')
@@ -94,6 +97,40 @@ async def category_items(message: types.Message):
         f"SELECT * FROM users WHERE user_id={message.from_user.id}")
     user_info = cursor.fetchone()
     await message.answer(f"Логин: @{message.from_user.username}\n \nДата Регистрации: {user_info[2][:11]}\n \nБаланс:")
+
+
+@dp.callback_query(F.data == 'usdt_trc_20')
+async def send_balance_usdt_trc_20(callback: types.CallbackQuery):
+    cursor.execute(
+        f"SELECT * FROM users WHERE user_id={callback.from_user.id}")
+    user_info = cursor.fetchone()
+
+    if user_info[4] == None:
+        wallet = create_wallet_usdt_trc_20()
+        cursor.execute(
+            'UPDATE users SET trc_20_wallet_address = ?, trc_20_wallet_private_key = ? WHERE user_id = ?',
+            (wallet['address'], wallet['key'], callback.from_user.id))
+        wallet_address = wallet['address']
+    else:
+        wallet_address = user_info[3]
+
+    conn.commit()
+
+    balance = check_balance_usdt_trc_20(wallet_address)
+    await callback.message.answer(f"Валюта получения: USDT TRC-20\nВаш баланс: {balance} USDT\nДля Вас сгенерирован кошелек:\n{wallet_address}\n \nДля пополнения своего баланса в боте, переведите нужную сумму на данный кошелек, и нажмите кнопку проверки платежа под этим сообщением.", reply_markup=builder_check_balance.as_markup())
+
+
+@dp.callback_query(F.data == 'email_high')
+async def email_high(callback: types.CallbackQuery):
+    product_quantity = check_product()
+    await callback.message.answer(f"Описание:\nЦена:\nКоличество: {product_quantity}", reply_markup=builder_buy.as_markup())
+
+
+@dp.callback_query(F.data == 'buy')
+async def buy(callback: types.CallbackQuery):
+    # product_quantity = check_product()
+    # await callback.message.answer(f"Описание:\nЦена:\nКоличество: {product_quantity}", reply_markup=builder_buy.as_markup())
+    pass
 
 
 async def main():
