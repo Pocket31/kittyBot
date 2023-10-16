@@ -1,8 +1,9 @@
-# from tronpy import Tron
+from tronpy import Tron
 
-# client = Tron()
-# balance = client.get_account_balance(str('TUYEn7biVvaM3arHPJZonZ4ecNyRZfS5pg'))
+# client = Tron(network="nile")
+# balance = client.get_account_balance(str('TEEWS5zXLmgNjEazXcgrQq41cPzd2KabRS'))
 # print(balance)
+
 
 def check_balance_usdt_trc_20(wallet_address):
     import requests
@@ -32,3 +33,6 @@ def check_balance_usdt_trc_20(wallet_address):
         if usdt_balance is None:
             usdt_balance = 0.00
         return usdt_balance
+
+
+print(check_balance_usdt_trc_20('TEEWS5zXLmgNjEazXcgrQq41cPzd2KabRS'))

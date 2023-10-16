@@ -8,32 +8,35 @@ pp = pprint.PrettyPrinter(indent=4)
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
-SERVICE_ACCOUNT_FILE = 'C:/Users/cr796/OneDrive/Документы/kittyBot/shop-402114-a6896552ca04.json'
+SERVICE_ACCOUNT_FILE = 'shop-402114-a6896552ca04.json'
 
 credentials = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 service = build('drive', 'v3', credentials=credentials)
 # results = service.files().list().execute()
 # pp.pprint(results)
-results = service.files().list(q="mimeType='text/plain'").execute()
+results = service.files().list(
+    q="'1QSHmvW9j5DhY2G-sNn7kRKzTYqmbKEYV' in parents").execute()
+# pp.pprint(results)
 
 
 def check_product():
     return len(results['files'])
 
 
+# pp.pprint(check_product())
+
+
 def download_file():
     file_id = results['files'][0]['id']
     request = service.files().get_media(fileId=file_id)
-    filename = 'C:/Users/cr796/OneDrive/Документы/kittyBot/file.txt'
+    filename = f'googledrive/downloads/file {file_id}.txt'
     fh = io.FileIO(filename, 'wb')
     downloader = MediaIoBaseDownload(fh, request)
     done = False
     while done is False:
         status, done = downloader.next_chunk()
-        print("Download %d%%." % int(status.progress() * 100))
-
-# pp.pprint(check_product())
+        # print("Download %d%%." % int(status.progress() * 100))
 
 
 def move_file():
@@ -56,4 +59,6 @@ def move_file():
     ).execute()
 
 
-move_file()
+# download_file()
+# move_file()
+# print(check_product())
