@@ -35,4 +35,4 @@ def check_balance_usdt_trc_20(wallet_address):
         return usdt_balance
 
 
-print(check_balance_usdt_trc_20('TEEWS5zXLmgNjEazXcgrQq41cPzd2KabRS'))
+print(check_balance_usdt_trc_20('TUYEn7biVvaM3arHPJZonZ4ecNyRZfS5pg'))
