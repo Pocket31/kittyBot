@@ -1,19 +1,25 @@
 import requests
+import time
+import asyncio
 
-trz = '8369c7958056ff7ac1e0aeee3ecb0757a81353331fb8f3dd26a5d8333168a910'
-transactions = []
-status = False
-while status == False:
+trz = '090e93b1696fc7dfc774306fc0fc7d7f41f8ac9e9c9844e03cb6bcc4afba876c'
 
-    response = requests.get(f"https://nile.trongrid.io/v1/accounts/{'TEEWS5zXLmgNjEazXcgrQq41cPzd2KabRS'}/transactions/{'trc20'}?&contract_address={'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf&only_confirmed=true'}"
-                            )
-    lol = response.json()
 
-    for transaction in lol['data']:
-        transactions.append(transaction['transaction_id'])
+async def check_tranzaktion(tranzaction_id):
+    transactions = []
+    status = False
+    while status == False:
+        response = requests.get(f"https://nile.trongrid.io/v1/accounts/{'TChGkQpWkfKvADqfMKfJBf2cLsgiMDBFhk'}/transactions/{'trc20'}?&contract_address={'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf&only_confirmed=true'}"
+                                )
+        lol = response.json()
+        await asyncio.sleep(30)
+        for transaction in lol['data']:
+            transactions.append(transaction['transaction_id'])
 
-    if trz in transactions:
-        print('транзакция успешна')
-        status = True
-    else:
-        print('транзация еще не прошла')
+        if tranzaction_id in transactions:
+            return True
+        else:
+            continue
+
+
+# print(check_tranzaktion(trz))

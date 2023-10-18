@@ -7,6 +7,8 @@ from aiogram import F
 
 from walet.CreateWallet import create_wallet_usdt_trc_20
 from walet.Balance import check_balance_usdt_trc_20
+from walet.SendTransaction import send_transaction
+from walet.CheckTranzStatus import check_tranzaktion
 from googledrive.GD import check_product
 from TOKEN import TELEGRAM_TOKEN
 
@@ -112,7 +114,7 @@ async def send_balance_usdt_trc_20(callback: types.CallbackQuery):
         f"SELECT * FROM users WHERE user_id={callback.from_user.id}")
     user_info = cursor.fetchone()
 
-    if user_info[4] == None:
+    if user_info[3] == None:
         wallet = create_wallet_usdt_trc_20()
         cursor.execute(
             'UPDATE users SET trc_20_wallet_address = ?, trc_20_wallet_private_key = ? WHERE user_id = ?',
@@ -135,8 +137,23 @@ async def email_high(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == 'buy')
 async def buy(callback: types.CallbackQuery):
+    if check_product() == 0:
+        await callback.answer(text='На данный момент товар отсутсвует!', show_alert=True)
+    else:
+        await callback.message.answer(f'Для подтверждения покупки нажмите "Подтвердить"', reply_markup=builder_confirm.as_markup())
+
+
+@dp.callback_query(F.data == 'confirm')
+async def confirm_buy(callback: types.CallbackQuery):
     # product_quantity = check_product()
-    await callback.message.answer(f"Для подтверждения покупки нажмите 'Подтвердить'", reply_markup=builder_confirm.as_markup())
+    cursor.execute(
+        f"SELECT * FROM users WHERE user_id={callback.from_user.id}")
+    user_info = cursor.fetchone()
+    transaction = send_transaction(private_key=user_info[4], wallet_address_from=user_info[3],
+                                   wallett_address_to='TChGkQpWkfKvADqfMKfJBf2cLsgiMDBFhk', amount=2000000)
+    await callback.message.answer(f"Выполняется транзакция.\n id транзакции {transaction}.\n По окончанию выполнения транзакции Вам будет отправлен товар")
+    await check_tranzaktion(tranzaction_id=transaction)
+    await callback.message.answer("Товар")
 
 
 async def main():

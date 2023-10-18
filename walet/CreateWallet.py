@@ -4,7 +4,7 @@ from tronpy.keys import PrivateKey
 
 def create_wallet_usdt_trc_20():
 
-    client = Tron(network="shasta")
+    client = Tron(network="nile")
     wallet = client.generate_address()
     wallet_info = {'address': wallet['base58check_address'],
                    'key': wallet['private_key']}

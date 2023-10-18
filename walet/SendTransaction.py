@@ -21,11 +21,11 @@ def send_transaction(private_key, wallet_address_from, wallett_address_to, amoun
     return transaction_info['id']
 
 
-private_key = 'db0d9add0d98120e2270a2fbb93166a6673f01cde1ccfa703132171e0461dfe2'
-wallet_address_from = 'TEEWS5zXLmgNjEazXcgrQq41cPzd2KabRS'
-wallett_address_to = 'TChGkQpWkfKvADqfMKfJBf2cLsgiMDBFhk'
-amount = 2000000
+# private_key = 'db0d9add0d98120e2270a2fbb93166a6673f01cde1ccfa703132171e0461dfe2'
+# wallet_address_from = 'TEEWS5zXLmgNjEazXcgrQq41cPzd2KabRS'
+# wallett_address_to = 'TBj8Mj78AT8fMMyiHZHzv3tf7Va9bcyD8z'
+# amount = 2000000
 
 
-print(send_transaction(private_key=private_key, wallet_address_from=wallet_address_from,
-                       wallett_address_to=wallett_address_to, amount=amount))
+# print(send_transaction(private_key=private_key, wallet_address_from=wallet_address_from,
+#                        wallett_address_to=wallett_address_to, amount=amount))

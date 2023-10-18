@@ -10,6 +10,7 @@ Private Key:  2ee87a665a372f79a3c03455244968d05b44920a884074d70fda52d8ff36291a
 
 usdt nile = TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf
 
+проверка баланса при нажатии кнопки купить
 
 
 контекстный менеджер для БД
