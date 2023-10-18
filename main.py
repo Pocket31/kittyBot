@@ -70,6 +70,13 @@ buy_button = InlineKeyboardButton(
     text='Купить', callback_data='buy')
 builder_buy.add(buy_button)
 
+builder_confirm = InlineKeyboardBuilder()
+confirm_button = InlineKeyboardButton(
+    text='Подтвердить', callback_data='confirm')
+cancel_button = InlineKeyboardButton(
+    text='Отменить', callback_data='email_high')
+builder_confirm.add(confirm_button, cancel_button)
+
 
 @dp.message(F.text == 'Товары')
 async def category_items(message: types.Message):
@@ -129,8 +136,7 @@ async def email_high(callback: types.CallbackQuery):
 @dp.callback_query(F.data == 'buy')
 async def buy(callback: types.CallbackQuery):
     # product_quantity = check_product()
-    # await callback.message.answer(f"Описание:\nЦена:\nКоличество: {product_quantity}", reply_markup=builder_buy.as_markup())
-    pass
+    await callback.message.answer(f"Для подтверждения покупки нажмите 'Подтвердить'", reply_markup=builder_confirm.as_markup())
 
 
 async def main():
