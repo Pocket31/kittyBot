@@ -1,9 +1,8 @@
-from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
+from googleapiclient.http import MediaIoBaseDownload
 import io
 import pprint
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
-import asyncio
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -16,12 +15,13 @@ credentials = service_account.Credentials.from_service_account_file(
 service = build('drive', 'v3', credentials=credentials)
 # results = service.files().list().execute()
 # pp.pprint(results)
-results = service.files().list(
-    q="'1QSHmvW9j5DhY2G-sNn7kRKzTYqmbKEYV' in parents").execute()
 # pp.pprint(results)
 
 
 def check_product():
+    '''Проверка наличия товаров на гугл-диске'''
+    results = service.files().list(
+        q="'1QSHmvW9j5DhY2G-sNn7kRKzTYqmbKEYV' in parents").execute()
     return len(results['files'])
 
 
@@ -29,6 +29,9 @@ def check_product():
 
 
 async def download_file(transaction):
+    '''Загрузка файла из гугл-диска и перемещение в папку "Продано"'''
+    results = service.files().list(
+        q="'1QSHmvW9j5DhY2G-sNn7kRKzTYqmbKEYV' in parents").execute()
     file_id = results['files'][0]['id']
     request = service.files().get_media(fileId=file_id)
     filename = f'googledrive/downloads/{transaction}.txt'

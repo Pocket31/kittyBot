@@ -33,6 +33,7 @@ from tronpy import Tron
 
 
 def check_balance_usdt_trc_20(wallet_address):
+    '''Проверка баланса кошелька'''
     client = Tron(network='nile')
     contract = client.get_contract(
         'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf')  # USDT TRC-20 nile

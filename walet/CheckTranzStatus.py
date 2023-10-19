@@ -1,11 +1,11 @@
 import requests
-import time
 import asyncio
 
 trz = '090e93b1696fc7dfc774306fc0fc7d7f41f8ac9e9c9844e03cb6bcc4afba876c'
 
 
 async def check_tranzaktion(tranzaction_id):
+    '''Проверка статуса транзакции'''
     transactions = []
     status = False
     while status == False:

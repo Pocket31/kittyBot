@@ -3,6 +3,7 @@ from tronpy.keys import PrivateKey
 
 
 def create_wallet_usdt_trc_20():
+    '''Создание кошелька'''
 
     client = Tron(network="nile")
     wallet = client.generate_address()

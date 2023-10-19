@@ -1,12 +1,12 @@
 from tronpy import Tron
 from tronpy.keys import PrivateKey
-import time
 
 client = Tron(network='nile')
 contract = client.get_contract('TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf')
 
 
 def send_transaction(private_key, wallet_address_from, wallett_address_to, amount):
+    '''Отправка транзакции'''
     priv_key = PrivateKey(bytes.fromhex(f'{private_key}'))
     txn = (
         contract.functions.transfer(
