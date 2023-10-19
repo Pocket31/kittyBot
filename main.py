@@ -5,10 +5,7 @@ from aiogram.filters import CommandStart
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from aiogram import F
 
-from walet.CreateWallet import create_wallet_usdt_trc_20
-from walet.Balance import check_balance_usdt_trc_20
-from walet.SendTransaction import send_transaction
-from walet.CheckTranzStatus import check_tranzaktion
+from walet.wallet import create_wallet_usdt_trc_20, check_balance_usdt_trc_20, send_transaction, check_tranzaktion, precision
 from googledrive.GD import check_product, download_file
 from TOKEN import TELEGRAM_TOKEN
 from os import remove
@@ -20,6 +17,7 @@ dp = Dispatcher()
 conn = sqlite3.connect('users.db')
 cursor = conn.cursor()
 user_id = None
+price_email_high = 6
 
 
 @dp.message(CommandStart())
@@ -75,7 +73,7 @@ builder_confirm = InlineKeyboardBuilder()
 confirm_button = InlineKeyboardButton(
     text='Подтвердить', callback_data='confirm')
 cancel_button = InlineKeyboardButton(
-    text='Отменить', callback_data='email_high')
+    text='Назад', callback_data='email_high')
 builder_confirm.add(confirm_button, cancel_button)
 
 
@@ -104,7 +102,8 @@ async def category_items(message: types.Message):
     cursor.execute(
         f"SELECT * FROM users WHERE user_id={message.from_user.id}")
     user_info = cursor.fetchone()
-    await message.answer(f"Логин: @{message.from_user.username}\n \nДата Регистрации: {user_info[2][:11]}\n \nБаланс:")
+    balance = check_balance_usdt_trc_20(user_info[3])
+    await message.answer(f"Логин: @{message.from_user.username}\n \nДата Регистрации: {user_info[2][:11]}\n \nБаланс: {balance} $")
 
 
 @dp.callback_query(F.data == 'usdt_trc_20')
@@ -131,13 +130,19 @@ async def send_balance_usdt_trc_20(callback: types.CallbackQuery):
 @dp.callback_query(F.data == 'email_high')
 async def email_high(callback: types.CallbackQuery):
     product_quantity = check_product()
-    await callback.message.answer(f"Описание:\nЦена:\nКоличество: {product_quantity}", reply_markup=builder_buy.as_markup())
+    await callback.message.answer(f"Описание: Почта high репутации (USA).\nЦена указана за одну почту.\nЦена: {price_email_high} $\nКоличество в наличии: {product_quantity}", reply_markup=builder_buy.as_markup())
 
 
 @dp.callback_query(F.data == 'buy')
 async def buy(callback: types.CallbackQuery):
-    if check_product() == 0:
-        await callback.answer(text='На данный момент товар отсутсвует!', show_alert=True)
+    cursor.execute(
+        f"SELECT * FROM users WHERE user_id={callback.from_user.id}")
+    user_info = cursor.fetchone()
+    balance = check_balance_usdt_trc_20(user_info[3])
+    if balance < price_email_high:
+        await callback.answer(text='Недостаточно средств на балансе!', reply_markup=builder_confirm.as_markup(), show_alert=True)
+    elif check_product() == 0:
+        await callback.answer(text='На данный момент товар отсутсвует!', reply_markup=builder_confirm.as_markup(), show_alert=True)
     else:
         await callback.message.answer(f'Для подтверждения покупки нажмите "Подтвердить"', reply_markup=builder_confirm.as_markup())
 
@@ -145,13 +150,14 @@ async def buy(callback: types.CallbackQuery):
 @dp.callback_query(F.data == 'confirm')
 async def confirm_buy(callback: types.CallbackQuery):
     if check_product() != 0:
-        # cursor.execute(
-        #     f"SELECT * FROM users WHERE user_id={callback.from_user.id}")
-        # user_info = cursor.fetchone()
-        # transaction = send_transaction(private_key=user_info[4], wallet_address_from=user_info[3],
-        #                                wallett_address_to='TChGkQpWkfKvADqfMKfJBf2cLsgiMDBFhk', amount=2000000)
-        transaction = '8fe41e14940192c00dc3b2d42ca42ed7d22ae89023e313b50ec032fba9e2d2ea'
-        await callback.message.answer(f"Выполняется транзакция.\n id транзакции {transaction}.\n По окончанию выполнения транзакции Вам будет отправлен товар")
+        cursor.execute(
+            f"SELECT * FROM users WHERE user_id={callback.from_user.id}")
+        user_info = cursor.fetchone()
+        transaction = send_transaction(private_key=user_info[4], wallet_address_from=user_info[3],
+                                       wallett_address_to='TChGkQpWkfKvADqfMKfJBf2cLsgiMDBFhk', amount=price_email_high*1000000)
+        # transaction = '8fe41e14940192c00dc3b2d42ca42ed7d22ae89023e313b50ec032fba9e2d2ea'
+        await callback.message.delete()
+        await callback.message.answer(f"Выполняется транзакция.\n Id транзакции: {transaction}.\n По окончанию выполнения транзакции Вам будет отправлен товар. Выполнение транзакции может занимать до 5 минут.")
         await check_tranzaktion(tranzaction_id=transaction)
         await download_file(transaction=transaction)
         file = FSInputFile(f'googledrive/downloads/{transaction}.txt')

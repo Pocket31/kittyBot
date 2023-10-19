@@ -1,13 +1,3 @@
-# import sqlite3
-
-# conn = sqlite3.connect('users.db')
-# cursor = conn.cursor()
-# cursor.execute(
-#     f"SELECT * FROM users WHERE user_id=253833381")
-# user_info = cursor.fetchone()
-# print(user_info)
-
-
 import requests
 import asyncio
 from tronpy import Tron, Contract
@@ -45,9 +35,6 @@ def send_transaction(private_key, wallet_address_from, wallett_address_to, amoun
     )
     transaction_info = txn.broadcast().wait()
     return transaction_info['id']
-
-
-trz = '090e93b1696fc7dfc774306fc0fc7d7f41f8ac9e9c9844e03cb6bcc4afba876c'
 
 
 async def check_tranzaktion(tranzaction_id):
