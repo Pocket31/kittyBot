@@ -1,6 +1,6 @@
 import asyncio
 from aiogram import Dispatcher, Bot, types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import CommandStart
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from aiogram import F
@@ -9,7 +9,7 @@ from walet.CreateWallet import create_wallet_usdt_trc_20
 from walet.Balance import check_balance_usdt_trc_20
 from walet.SendTransaction import send_transaction
 from walet.CheckTranzStatus import check_tranzaktion
-from googledrive.GD import check_product
+from googledrive.GD import check_product, download_file
 from TOKEN import TELEGRAM_TOKEN
 
 import sqlite3
@@ -19,7 +19,6 @@ bot = Bot(token=TELEGRAM_TOKEN)
 dp = Dispatcher()
 conn = sqlite3.connect('users.db')
 cursor = conn.cursor()
-
 user_id = None
 
 
@@ -145,15 +144,18 @@ async def buy(callback: types.CallbackQuery):
 
 @dp.callback_query(F.data == 'confirm')
 async def confirm_buy(callback: types.CallbackQuery):
-    # product_quantity = check_product()
-    cursor.execute(
-        f"SELECT * FROM users WHERE user_id={callback.from_user.id}")
-    user_info = cursor.fetchone()
-    transaction = send_transaction(private_key=user_info[4], wallet_address_from=user_info[3],
-                                   wallett_address_to='TChGkQpWkfKvADqfMKfJBf2cLsgiMDBFhk', amount=2000000)
+    # # product_quantity = check_product()
+    # cursor.execute(
+    #     f"SELECT * FROM users WHERE user_id={callback.from_user.id}")
+    # user_info = cursor.fetchone()
+    # transaction = send_transaction(private_key=user_info[4], wallet_address_from=user_info[3],
+    #                                wallett_address_to='TChGkQpWkfKvADqfMKfJBf2cLsgiMDBFhk', amount=2000000)
+    transaction = '8fe41e14940192c00dc3b2d42ca42ed7d22ae89023e313b50ec032fba9e2d2ea'
     await callback.message.answer(f"Выполняется транзакция.\n id транзакции {transaction}.\n По окончанию выполнения транзакции Вам будет отправлен товар")
     await check_tranzaktion(tranzaction_id=transaction)
-    await callback.message.answer("Товар")
+    await download_file(transaction=transaction)
+    file = FSInputFile(f'googledrive/downloads/{transaction}.txt')
+    await bot.send_document(callback.from_user.id,  document=file)
 
 
 async def main():

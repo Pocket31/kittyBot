@@ -3,6 +3,7 @@ import io
 import pprint
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
+import asyncio
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -27,20 +28,17 @@ def check_product():
 # pp.pprint(check_product())
 
 
-def download_file():
+async def download_file(transaction):
     file_id = results['files'][0]['id']
     request = service.files().get_media(fileId=file_id)
-    filename = f'googledrive/downloads/file {file_id}.txt'
+    filename = f'googledrive/downloads/{transaction}.txt'
     fh = io.FileIO(filename, 'wb')
     downloader = MediaIoBaseDownload(fh, request)
     done = False
     while done is False:
         status, done = downloader.next_chunk()
         # print("Download %d%%." % int(status.progress() * 100))
-
-
-def move_file():
-    file_id = results['files'][0]['id']
+    # file_id = results['files'][0]['id']
     folder_id = '1NYfQzHrq_xecGEr2_4o9bXqeoKwFItrG'
 
     if not file_id or not folder_id:
@@ -62,3 +60,9 @@ def move_file():
 # download_file()
 # move_file()
 # print(check_product())
+# async def lol():
+
+#     transaction = '777c03497e20031d46b7655becfc44ed8be3b269cd11e04f30748d9a9cd1b4a6'
+#     await download_file(transaction=transaction)
+
+# asyncio.run(lol())
